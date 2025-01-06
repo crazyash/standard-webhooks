@@ -20,10 +20,28 @@ import javax.crypto.spec.SecretKeySpec;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
-
 public class WebhookTest {
 	private static final int TOLERANCE_IN_MS = 5 * 60 * 1000;
 	private static final int SECOND_IN_MS = 1000;
+
+	// @Test
+	// public void verifyTest() throws WebhookVerificationException {
+
+	// 	Webhook webhook = new Webhook("NjBmNjc0MzQtMGVkZS00MTk5LWE1MGItNDk0ZTk5MmVjNTBi");
+
+	// 	HashMap<String, ArrayList<String>> headerMap = new HashMap<String, ArrayList<String>>();
+	// 	headerMap.put("webhook-id", new ArrayList<String>(Arrays.asList("msg_def6f975-b3cb-43ac-80a7-3fdd4edb643d")));
+	// 	headerMap.put("webhook-timestamp", new ArrayList<String>(Arrays.asList("1735221275")));
+	// 	headerMap.put("webhook-signature", new ArrayList<String>(
+	// 			Arrays.asList(String.format("v1,%s", "L9HMZxvMXhNtvsDVsSQVTyGvwVj70f8DOwLbKaLxUWQ="))));
+
+	// 	HashMap<String, List<String>> map = new HashMap<String, List<String>>();
+	// 	for (Map.Entry<String, ArrayList<String>> entry : headerMap.entrySet()) {
+	// 		map.put(entry.getKey(), entry.getValue());
+	// 	}
+
+	// 	webhook.verify("{\"type\":\"trials\",\"timestamp\":\"2024-11-13T09:26:18.138Z\",\"data\":{\"id\":\"1f81eb52-5198-4599-803e-771906343485\"}}", HttpHeaders.of(map, (k, v) -> true));
+	// }
 
 	@Test
 	public void verifyValidPayloadAndheader() throws WebhookVerificationException {
@@ -52,10 +70,10 @@ public class WebhookTest {
 	public void verifyValidPayloadWithMultipleSignaturesIsValid() throws WebhookVerificationException {
 		TestPayload testPayload = new TestPayload(System.currentTimeMillis());
 		String[] sigs = new String[] {
-			"v1,Ceo5qEr07ixe2NLpvHk3FH9bwy/WavXrAFQ/9tdO6mc=",
-			"v2,Ceo5qEr07ixe2NLpvHk3FH9bwy/WavXrAFQ/9tdO6mc=",
-			testPayload.headerMap.get("webhook-signature").get(0), // valid signature
-			"v1,Ceo5qEr07ixe2NLpvHk3FH9bwy/WavXrAFQ/9tdO6mc=",
+				"v1,Ceo5qEr07ixe2NLpvHk3FH9bwy/WavXrAFQ/9tdO6mc=",
+				"v2,Ceo5qEr07ixe2NLpvHk3FH9bwy/WavXrAFQ/9tdO6mc=",
+				testPayload.headerMap.get("webhook-signature").get(0), // valid signature
+				"v1,Ceo5qEr07ixe2NLpvHk3FH9bwy/WavXrAFQ/9tdO6mc=",
 		};
 		testPayload.headerMap.put("webhook-signature", new ArrayList<String>(Arrays.asList(String.join(" ", sigs))));
 
@@ -91,7 +109,8 @@ public class WebhookTest {
 	@Test
 	public void verifySignatureWithDifferentVersionThrowsException() {
 		TestPayload testPayload = new TestPayload(System.currentTimeMillis());
-		testPayload.headerMap.put(Webhook.UNBRANDED_MSG_ID_KEY, new ArrayList<String>(Arrays.asList("v2,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=")));
+		testPayload.headerMap.put(Webhook.UNBRANDED_MSG_ID_KEY,
+				new ArrayList<String>(Arrays.asList("v2,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=")));
 
 		assertThrows(WebhookVerificationException.class, verify(testPayload));
 	}
@@ -99,7 +118,8 @@ public class WebhookTest {
 	@Test
 	public void verifyMissingPartsInSignatureThrowsException() {
 		TestPayload testPayload = new TestPayload(System.currentTimeMillis());
-		testPayload.headerMap.put(Webhook.UNBRANDED_MSG_ID_KEY, new ArrayList<String>(Arrays.asList("invalid_signature")));
+		testPayload.headerMap.put(Webhook.UNBRANDED_MSG_ID_KEY,
+				new ArrayList<String>(Arrays.asList("invalid_signature")));
 
 		assertThrows(WebhookVerificationException.class, verify(testPayload));
 	}
@@ -107,7 +127,8 @@ public class WebhookTest {
 	@Test
 	public void verifySignatureMismatchThrowsException() {
 		TestPayload testPayload = new TestPayload(System.currentTimeMillis());
-		testPayload.headerMap.put(Webhook.UNBRANDED_MSG_ID_KEY, new ArrayList<String>(Arrays.asList("v1,invalid_signature")));
+		testPayload.headerMap.put(Webhook.UNBRANDED_MSG_ID_KEY,
+				new ArrayList<String>(Arrays.asList("v1,invalid_signature")));
 
 		assertThrows(WebhookVerificationException.class, verify(testPayload));
 	}
@@ -150,7 +171,6 @@ public class WebhookTest {
 		assertEquals(signature, expected);
 	}
 
-
 	private ThrowingRunnable verify(final TestPayload testPayload) {
 		return new ThrowingRunnable() {
 			@Override
@@ -179,7 +199,6 @@ public class WebhookTest {
 			this.payload = TestPayload.DEFAULT_PAYLOAD;
 			this.secret = TestPayload.DEFAULT_SECRET;
 
-
 			try {
 				String toSign = String.format("%s.%s.%s", this.id, this.timestamp, this.payload);
 				Mac sha512Hmac = Mac.getInstance("HmacSHA256");
@@ -194,7 +213,8 @@ public class WebhookTest {
 			this.headerMap = new HashMap<String, ArrayList<String>>();
 			headerMap.put("webhook-id", new ArrayList<String>(Arrays.asList(this.id)));
 			headerMap.put("webhook-timestamp", new ArrayList<String>(Arrays.asList(this.timestamp)));
-			headerMap.put("webhook-signature", new ArrayList<String>(Arrays.asList(String.format("v1,%s", this.signature))));
+			headerMap.put("webhook-signature",
+					new ArrayList<String>(Arrays.asList(String.format("v1,%s", this.signature))));
 		}
 
 		public HttpHeaders headers() {

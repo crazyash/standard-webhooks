@@ -7,8 +7,8 @@ plugins {
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 group = GROUP
 version = VERSION_NAME
@@ -37,7 +37,6 @@ dependencies {
 
 jar {
     archiveBaseName = POM_ARTIFACT_ID
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes('Implementation-Title': POM_NAME,
                    'Implementation-Version': VERSION_NAME,
@@ -45,9 +44,6 @@ jar {
                    'Export-Package': 'com.standardwebhooks,com.standardwebhooks.exceptions')
 
         archiveVersion = VERSION_NAME
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
